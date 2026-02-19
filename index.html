@@ -27,29 +27,29 @@
     <div id="thanks">Děkujeme! ✔️</div>
 
     <script>
-        function vote(hodnota) {
-            // Tohle je tvůj ověřený základ
-            const baseUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc0W5SfA9bpxpVEybhPDUp6jEVyvTslMkfV8x06EQhHgOpQ2A/formResponse";
-            const entryID = "entry.257471383";
-            
-            // Sestavíme přesně ten odkaz, který ti v prohlížeči fungoval
-            const finalURL = baseUrl + "?" + entryID + "=" + hodnota + "&submit=Submit";
+    function vote(hodnota) {
+        const baseUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc0W5SfA9bpxpVEybhPDUp6jEVyvTslMkfV8x06EQhHgOpQ2A/formResponse";
+        const entryID = "entry.257471383";
 
-            // Vytvoříme neviditelný iframe, který ten odkaz "otevře" na pozadí
-            const ifr = document.createElement('iframe');
-            ifr.src = finalURL;
-            ifr.style.display = 'none';
-            document.body.appendChild(ifr);
+        // Vytvoříme data pro odeslání
+        const params = new URLSearchParams();
+        params.append(entryID, hodnota);
 
-            // Zobrazíme poděkování
-            document.getElementById('thanks').style.display = 'flex';
-            
-            // Po sekundě vše uklidíme a resetujeme
-            setTimeout(() => {
-                document.getElementById('thanks').style.display = 'none';
-                document.body.removeChild(ifr);
-            }, 1200);
-        }
-    </script>
+        // Metoda sendBeacon - pošle data na pozadí a prohlížeč mu do toho nekecá
+        navigator.sendBeacon(baseUrl, params);
+
+        // Zobrazení poděkování (okamžitě, nečekáme na nic)
+        document.getElementById('thanks').style.display = 'flex';
+        
+        setTimeout(() => {
+            document.getElementById('thanks').style.display = 'none';
+        }, 1200);
+    }
+
+    // Prevence zoomu pro tablety
+    document.addEventListener('touchstart', function (e) {
+        if (e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+</script>
 </body>
 </html>
