@@ -3,29 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hodnocení oběda</title>
+    <title>Jidelna</title>
     <style>
-        body { 
-            margin: 0; font-family: sans-serif; background-color: #f0f2f5; 
-            display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; height: 100vh; overflow: hidden; user-select: none;
-        }
+        body { margin: 0; font-family: sans-serif; background-color: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; user-select: none; }
         h1 { font-size: 3.5rem; color: #1a73e8; margin-bottom: 80px; text-align: center; font-weight: bold; }
         .container { display: flex; gap: 50px; }
-        .btn { 
-            border: none; background: white; border-radius: 50%; 
-            width: 260px; height: 260px; cursor: pointer; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.1s; outline: none;
-        }
+        .btn { border: none; background: white; border-radius: 50%; width: 260px; height: 260px; cursor: pointer; box-shadow: 0 15px 35px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; transition: transform 0.1s; outline: none; }
         .btn:active { transform: scale(0.85); background-color: #e8f0fe; }
         .emoji { font-size: 150px; }
-        #thanks { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: white; display: none; align-items: center; 
-            justify-content: center; font-size: 5rem; color: #1e8e3e; font-weight: bold; z-index: 100;
-        }
+        #thanks { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; align-items: center; justify-content: center; font-size: 5rem; color: #1e8e3e; font-weight: bold; z-index: 100; }
     </style>
 </head>
 <body>
@@ -40,32 +26,30 @@
 
     <div id="thanks">Děkujeme! ✔️</div>
 
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-
     <script>
         function vote(hodnota) {
+            // Tohle je tvůj ověřený základ
             const baseUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc0W5SfA9bpxpVEybhPDUp6jEVyvTslMkfV8x06EQhHgOpQ2A/formResponse";
             const entryID = "entry.257471383";
             
-            // Vytvoříme ten stejný odkaz, který ti právě zafungoval v prohlížeči
-            const fullURL = baseUrl + "?" + entryID + "=" + hodnota + "&submit=Submit";
+            // Sestavíme přesně ten odkaz, který ti v prohlížeči fungoval
+            const finalURL = baseUrl + "?" + entryID + "=" + hodnota + "&submit=Submit";
 
-            // "Načteme" tento odkaz do skrytého okna (iframe)
-            document.getElementById('hidden_iframe').src = fullURL;
+            // Vytvoříme neviditelný iframe, který ten odkaz "otevře" na pozadí
+            const ifr = document.createElement('iframe');
+            ifr.src = finalURL;
+            ifr.style.display = 'none';
+            document.body.appendChild(ifr);
 
-            // Zobrazení poděkování
+            // Zobrazíme poděkování
             document.getElementById('thanks').style.display = 'flex';
             
-            // Po 1,2 sekundě schováme poděkování a připravíme aplikaci pro dalšího
+            // Po sekundě vše uklidíme a resetujeme
             setTimeout(() => {
                 document.getElementById('thanks').style.display = 'none';
+                document.body.removeChild(ifr);
             }, 1200);
         }
-
-        // Zamezení nechtěnému zoomu na tabletu
-        document.addEventListener('touchstart', function (e) {
-            if (e.touches.length > 1) e.preventDefault();
-        }, { passive: false });
     </script>
 </body>
 </html>
