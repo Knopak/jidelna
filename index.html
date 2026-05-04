@@ -3,61 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jidelna</title>
+    <title>Hodnocení oběda</title>
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; user-select: none; }
-        h1 { font-size: 3.5rem; color: #1a73e8; margin-bottom: 80px; text-align: center; font-weight: bold; }
-        .container { display: flex; gap: 50px; }
-        .btn { border: none; background: white; border-radius: 50%; width: 260px; height: 260px; cursor: pointer; box-shadow: 0 15px 35px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; transition: transform 0.1s; outline: none; -webkit-tap-highlight-color: transparent; }
-        .btn:active { transform: scale(0.85); background-color: #e8f0fe; }
-        .emoji { font-size: 150px; pointer-events: none; }
-        #thanks { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; align-items: center; justify-content: center; font-size: 5rem; color: #1e8e3e; font-weight: bold; z-index: 100; }
+        h1 { font-size: 3rem; color: #1a73e8; margin-bottom: 50px; text-align: center; font-weight: bold; }
+        
+        .container { display: flex; gap: 40px; }
+        
+        /* Styl pro velká tlačítka výběru oběda */
+        .btn-choice { 
+            border: none; background: #1a73e8; color: white; border-radius: 20px; 
+            padding: 40px 60px; font-size: 3rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: transform 0.1s;
+        }
+        
+        /* Styl pro smajlíky */
+        .btn-emoji { 
+            border: none; background: white; border-radius: 50%; 
+            width: 240px; height: 240px; cursor: pointer; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.1s; outline: none;
+        }
+        
+        .btn-choice:active, .btn-emoji:active { transform: scale(0.9); }
+        .emoji { font-size: 130px; }
+        
+        #step2, #thanks { display: none; }
+        
+        #thanks { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: white; align-items: center; 
+            justify-content: center; font-size: 5rem; color: #1e8e3e; font-weight: bold; z-index: 100;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Jak vám chutnal dnešní oběd?</h1>
+    <div id="step1">
+        <h1>Vyberte oběd, který hodnotíte:</h1>
+        <div class="container">
+            <button class="btn-choice" onclick="selectLunch('Oběd 1')">Oběd 1</button>
+            <button class="btn-choice" onclick="selectLunch('Oběd 2')">Oběd 2</button>
+        </div>
+    </div>
 
-    <div class="container">
-        <button class="btn" onclick="sendVote('ano')"><span class="emoji">😋</span></button>
-        <button class="btn" onclick="sendVote('neutral')"><span class="emoji">😐</span></button>
-        <button class="btn" onclick="sendVote('ne')"><span class="emoji">☹️</span></button>
+    <div id="step2">
+        <h1 id="lunchTitle">Jak vám chutnalo?</h1>
+        <div class="container">
+            <button class="btn-emoji" onclick="submitVote('ano')"><span class="emoji">😋</span></button>
+            <button class="btn-emoji" onclick="submitVote('neutral')"><span class="emoji">😐</span></button>
+            <button class="btn-emoji" onclick="submitVote('ne')"><span class="emoji">☹️</span></button>
+        </div>
     </div>
 
     <div id="thanks">Děkujeme! ✔️</div>
 
-    <iframe name="voted_target" id="voted_target" style="display:none;"></iframe>
+    <form id="hiddenForm" action="https://docs.google.com/forms/d/e/1FAIpQLSc0W5SfA9bpxpVEybhPDUp6jEVyvTslMkfV8x06EQhHgOpQ2A/formResponse" method="POST" target="hidden_iframe">
+        <input type="hidden" id="entryField" name="entry.257471383" value="">
+    </form>
+    <iframe name="hidden_iframe" style="display:none;"></iframe>
 
     <script>
-        function sendVote(hodnota) {
-            const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSc0W5SfA9bpxpVEybhPDUp6jEVyvTslMkfV8x06EQhHgOpQ2A/formResponse";
-            const entryID = "entry.257471383";
+        let selectedLunch = "";
 
-            // Vytvoříme formulář dynamicky
-            const f = document.createElement('form');
-            f.action = formURL;
-            f.method = 'POST';
-            f.target = 'voted_target'; // Směrujeme do skrytého iframe
+        // Funkce pro první krok
+        function selectLunch(lunch) {
+            selectedLunch = lunch;
+            document.getElementById('lunchTitle').innerText = lunch + ": Jak vám chutnalo?";
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        }
 
-            const i = document.createElement('input');
-            i.name = entryID;
-            i.value = hodnota;
-            
-            f.appendChild(i);
-            document.body.appendChild(f);
+        // Funkce pro odeslání a poděkování
+        function submitVote(rating) {
+            const finalValue = selectedLunch + ": " + rating;
+            document.getElementById('entryField').value = finalValue;
             
             // Odeslání
-            f.submit();
-            
-            // Úklid
-            document.body.removeChild(f);
+            document.getElementById('hiddenForm').submit();
 
             // Zobrazení poděkování
             document.getElementById('thanks').style.display = 'flex';
-            setTimeout(() => {
-                // Reset stránky pro dalšího strávníka (pro jistotu vyčistíme iframe)
-                document.getElementById('voted_target').src = "about:blank";
+
+            // Reset na začátek po 1.5 vteřině
+            setTimeout(function() {
                 document.getElementById('thanks').style.display = 'none';
+                document.getElementById('step2').style.display = 'none';
+                document.getElementById('step1').style.display = 'block';
+                selectedLunch = "";
             }, 1500);
         }
     </script>
