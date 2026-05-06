@@ -3,96 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hodnocení oběda</title>
+    <title>Hodnocení oběda - Školní jídelna</title>
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; user-select: none; }
-        h1 { font-size: 3rem; color: #1a73e8; margin-bottom: 50px; text-align: center; font-weight: bold; }
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #5f6368;
+            --success-color: #1e8e3e;
+            --bg-color: #f0f2f5;
+        }
+
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg-color); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            overflow: hidden; 
+            user-select: none; 
+        }
+
+        h1 { 
+            font-size: 2.8rem; 
+            color: var(--primary-color); 
+            margin-bottom: 40px; 
+            text-align: center; 
+            font-weight: bold; 
+            padding: 0 20px;
+            max-width: 800px;
+        }
+
+        .container { 
+            display: flex; 
+            gap: 30px; 
+            justify-content: center; 
+            flex-wrap: wrap;
+        }
         
-        .container { display: flex; gap: 40px; }
-        
-        /* Styl pro velká tlačítka výběru oběda */
+        /* Velká tlačítka pro volby */
         .btn-choice { 
-            border: none; background: #1a73e8; color: white; border-radius: 20px; 
-            padding: 40px 60px; font-size: 3rem; font-weight: bold; cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: transform 0.1s;
+            border: none; 
+            background: var(--primary-color); 
+            color: white; 
+            border-radius: 25px; 
+            padding: 40px 60px; 
+            font-size: 2.8rem; 
+            font-weight: bold; 
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            transition: transform 0.1s, background-color 0.2s;
         }
+
+        .btn-choice:active { transform: scale(0.95); }
         
-        /* Styl pro smajlíky */
+        /* Tlačítka se smajlíky */
         .btn-emoji { 
-            border: none; background: white; border-radius: 50%; 
-            width: 240px; height: 240px; cursor: pointer; 
+            border: none; 
+            background: white; 
+            border-radius: 50%; 
+            width: 220px; 
+            height: 220px; 
+            cursor: pointer; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.1s; outline: none;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: transform 0.1s, box-shadow 0.2s; 
+            outline: none;
         }
         
-        .btn-choice:active, .btn-emoji:active { transform: scale(0.9); }
-        .emoji { font-size: 130px; }
+        .btn-emoji:active { transform: scale(0.9); }
+        .emoji { font-size: 110px; }
         
-        #step2, #thanks { display: none; }
+        /* Správa kroků */
+        .step { 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 100%;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .active { display: flex; }
         
+        /* Obrazovka s poděkováním */
         #thanks { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: white; align-items: center; 
-            justify-content: center; font-size: 5rem; color: #1e8e3e; font-weight: bold; z-index: 100;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: white; 
+            display: none;
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            font-size: 5rem; 
+            color: var(--success-color); 
+            font-weight: bold; 
+            z-index: 100; 
+        }
+
+        .sub-thanks {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div id="step1">
-        <h1>Vyberte oběd, který hodnotíte:</h1>
+    <!-- KROK 1: Dotaz na polévku -->
+    <div id="step-soup-check" class="step active">
+        <h1>Měl jsi dnes polévku?</h1>
         <div class="container">
-            <button class="btn-choice" onclick="selectLunch('Oběd 1')">Oběd 1</button>
-            <button class="btn-choice" onclick="selectLunch('Oběd 2')">Oběd 2</button>
+            <button class="btn-choice" onclick="handleSoupCheck(true)">ANO</button>
+            <button class="btn-choice" style="background-color: var(--secondary-color);" onclick="handleSoupCheck(false)">NE</button>
         </div>
     </div>
 
-    <div id="step2">
-        <h1 id="lunchTitle">Jak vám chutnalo?</h1>
+    <!-- KROK 2: Hodnocení polévky -->
+    <div id="step-soup-rating" class="step">
+        <h1>Jak ti chutnala polévka?</h1>
         <div class="container">
-            <button class="btn-emoji" onclick="submitVote('ano')"><span class="emoji">😋</span></button>
-            <button class="btn-emoji" onclick="submitVote('neutral')"><span class="emoji">😐</span></button>
-            <button class="btn-emoji" onclick="submitVote('ne')"><span class="emoji">☹️</span></button>
+            <button class="btn-emoji" onclick="saveSoupRating('😋')"><span class="emoji">😋</span></button>
+            <button class="btn-emoji" onclick="saveSoupRating('😐')"><span class="emoji">😐</span></button>
+            <button class="btn-emoji" onclick="saveSoupRating('☹️')"><span class="emoji">☹️</span></button>
         </div>
     </div>
 
-    <div id="thanks">Děkujeme! ✔️</div>
+    <!-- KROK 3: Výběr hlavního jídla -->
+    <div id="step-lunch-select" class="step">
+        <h1>Které hlavní jídlo jsi měl?</h1>
+        <div class="container">
+            <button class="btn-choice" onclick="saveLunchType('Oběd 1')">Oběd 1</button>
+            <button class="btn-choice" onclick="saveLunchType('Oběd 2')">Oběd 2</button>
+        </div>
+    </div>
 
+    <!-- KROK 4: Hodnocení hlavního jídla -->
+    <div id="step-lunch-rating" class="step">
+        <h1 id="lunchTitle">Jak ti chutnal oběd?</h1>
+        <div class="container">
+            <button class="btn-emoji" onclick="submitFinal('😋')"><span class="emoji">😋</span></button>
+            <button class="btn-emoji" onclick="submitFinal('😐')"><span class="emoji">😐</span></button>
+            <button class="btn-emoji" onclick="submitFinal('☹️')"><span class="emoji">☹️</span></button>
+        </div>
+    </div>
+
+    <!-- Poděkování -->
+    <div id="thanks">
+        <div>Děkujeme! ✔️</div>
+        <div class="sub-thanks">Tvůj hlas byl uložen.</div>
+    </div>
+
+    <!-- Skrytý formulář pro odesílání do Google Forms -->
     <form id="hiddenForm" action="https://docs.google.com/forms/d/e/1FAIpQLSc0W5SfA9bpxpVEybhPDUp6jEVyvTslMkfV8x06EQhHgOpQ2A/formResponse" method="POST" target="hidden_iframe">
-        <input type="hidden" id="entryField" name="entry.257471383" value="">
+        <!-- Polévka -->
+        <input type="hidden" id="entrySoup" name="entry.591939964" value=""> 
+        <!-- Výběr oběda -->
+        <input type="hidden" id="entryType" name="entry.1584707196" value="">
+        <!-- Spokojenost s obědem -->
+        <input type="hidden" id="entryRating" name="entry.257471383" value="">
     </form>
+    
+    <!-- Iframe zabraňuje přesměrování stránky po odeslání -->
     <iframe name="hidden_iframe" style="display:none;"></iframe>
 
     <script>
-        let selectedLunch = "";
+        // Objekt pro dočasné uložení odpovědí
+        let responses = {
+            soup: "",
+            lunchType: "",
+            lunchRating: ""
+        };
 
-        // Funkce pro první krok
-        function selectLunch(lunch) {
-            selectedLunch = lunch;
-            document.getElementById('lunchTitle').innerText = lunch + ": Jak vám chutnalo?";
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
+        // Funkce pro přepínání obrazovek
+        function showStep(stepId) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById(stepId).classList.add('active');
         }
 
-        // Funkce pro odeslání a poděkování
-        function submitVote(rating) {
-            const finalValue = selectedLunch + ": " + rating;
-            document.getElementById('entryField').value = finalValue;
+        // Logika pro první otázku (Polévka ano/ne)
+        function handleSoupCheck(hadSoup) {
+            if (hadSoup) {
+                showStep('step-soup-rating');
+            } else {
+                responses.soup = "Neměl";
+                showStep('step-lunch-select');
+            }
+        }
+
+        // Uložení hodnocení polévky
+        function saveSoupRating(emoji) {
+            responses.soup = emoji;
+            showStep('step-lunch-select');
+        }
+
+        // Uložení typu hlavního jídla
+        function saveLunchType(type) {
+            responses.lunchType = type;
+            document.getElementById('lunchTitle').innerText = type + ": Jak ti chutnalo?";
+            showStep('step-lunch-rating');
+        }
+
+        // Finální odeslání dat
+        function submitFinal(emoji) {
+            responses.lunchRating = emoji;
             
-            // Odeslání
+            // Naplnění skrytého formuláře daty
+            document.getElementById('entrySoup').value = responses.soup;
+            document.getElementById('entryType').value = responses.lunchType;
+            document.getElementById('entryRating').value = responses.lunchRating;
+            
+            // Odeslání formuláře
             document.getElementById('hiddenForm').submit();
 
             // Zobrazení poděkování
-            document.getElementById('thanks').style.display = 'flex';
+            const thanksDiv = document.getElementById('thanks');
+            thanksDiv.style.display = 'flex';
 
-            // Reset na začátek po 1.5 vteřině
-            setTimeout(function() {
-                document.getElementById('thanks').style.display = 'none';
-                document.getElementById('step2').style.display = 'none';
-                document.getElementById('step1').style.display = 'block';
-                selectedLunch = "";
-            }, 1500);
+            // Automatický restart po 2 vteřinách pro dalšího žáka
+            setTimeout(() => {
+                location.reload(); 
+            }, 2000);
         }
     </script>
 </body>
